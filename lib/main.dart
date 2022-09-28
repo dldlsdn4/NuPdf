@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,7 +14,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -27,11 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _clickPdf() {
-    setState(() {
-      print("click pdf");
-    });
-  }
+  _clickPdf() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +40,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'pdf',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            Expanded(
+              child: Container(
+                child: PdfView(path: '/assets/chaket.pdf'),
+              ),
+            )
           ],
         ),
       ),
