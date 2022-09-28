@@ -2,69 +2,78 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
+import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  final sampleUrl = 'https://www.africau.edu/images/default/sample.pdf';
-
-  String? pdfFlePath;
-
-  Future<String> downloadAndSavePdf() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/chaket.pdf');
-    if (await file.exists()) {
-      return file.path;
-    }
-    final response = await http.get(Uri.parse(sampleUrl));
-    await file.writeAsBytes(response.bodyBytes);
-    return file.path;
-  }
-
-  void loadPdf() async {
-    pdfFlePath = await downloadAndSavePdf();
-    setState(() {});
-  }
-
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Builder(builder: (context) {
-        return Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            title: Text('Plugin example app'),
-          ),
-          body: Center(
-            child: Column(
-              children: <Widget>[
-                ElevatedButton(
-                  child: Text("Load pdf"),
-                  onPressed: loadPdf,
-                ),
-                if (pdfFlePath != null)
-                  Expanded(
-                    child: Container(
-                      child: PdfView(path: pdfFlePath!),
-                    ),
-                  )
-                else
-                  Text("Pdf is not Loaded"),
-              ],
-            ),
-          ),
-        );
-      }),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const MyHomePage(),
+      debugShowCheckedModeBanner: false,
     );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: SingleUploadClick,
+              child: Text('SingleUpload'),
+            ),
+            TextButton(
+              onPressed: MultiUploadClick,
+              child: Text('MultiUpload'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  SingleUploadClick() async {
+    print('flieupload click');
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'pdf', 'png'],
+    );
+
+    if (result != null) {
+      print('result : ' + result.files.first.name);
+    } else {
+      print('사용자가 업로드를 취소했습니다.');
+    }
+  }
+
+  MultiUploadClick() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(allowMultiple: true);
+
+    if (result != null) {
+      List<File> files = result.paths.map((path) => File(path!)).toList();
+      print('files : ' + files.length.toString());
+    } else {
+      print('사용자가 업로드를 취소했습니다.');
+    }
   }
 }
